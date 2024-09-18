@@ -5,7 +5,10 @@ namespace EventGenerationAndProcessingSystem;
 
 public class ApplicationDbContext : DbContext, IDesignTimeDbContextFactory<ApplicationDbContext>
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+        Database.EnsureCreated();
+    }
 
     public ApplicationDbContext(){}
     

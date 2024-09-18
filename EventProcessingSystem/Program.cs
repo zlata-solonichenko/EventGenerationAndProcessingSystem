@@ -9,7 +9,7 @@ builder.Services.AddHttpClient();
 
 // Регистрация DbContext с использованием Npgsql
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("BloggingDatabase")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Регистрация EventProcessorService
 builder.Services.AddScoped<EventProcessorService>();
@@ -31,9 +31,6 @@ if (app.Environment.IsDevelopment())
 }
 
 // dotnet ef migrations add InitialCreate --project EventProcessingSystem.csproj
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 // app.UseRouting();
 // app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

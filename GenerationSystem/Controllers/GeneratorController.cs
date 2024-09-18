@@ -1,4 +1,8 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace EventGenerationAndProcessingSystem.Controllers;
 
@@ -6,20 +10,21 @@ namespace EventGenerationAndProcessingSystem.Controllers;
 [Route("api/[controller]")]
 public class GeneratorController : ControllerBase
 {
-    private readonly EventGeneratorService _eventGeneratorService;
 
-     public GeneratorController(EventGeneratorService eventService)
-     {
-         _eventGeneratorService = eventService;
-     }
+    private readonly HttpClient _httpClient;
+    public GeneratorController(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
 
-     /// <summary>
-     /// Генерация события вручную
-     /// </summary>
-     /// <returns></returns>
+    /// <summary>
+    /// Генерация события вручную
+    /// </summary>
+    /// <returns></returns>
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateManualEvent([FromBody] Event getEvent)
     {
+        
         if (getEvent == null)
         {
             return BadRequest("Event data is null");
@@ -35,6 +40,10 @@ public class GeneratorController : ControllerBase
                 Time = DateTime.UtcNow
             };
 
+            // Отправка события по HTTP
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:7297/api/events", newEvent);
+            response.EnsureSuccessStatusCode();
+            
             return Ok(newEvent);
         }
         catch (Exception ex)
