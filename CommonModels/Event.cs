@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace EventGenerationAndProcessingSystem;
 
 /// <summary>
@@ -5,26 +7,31 @@ namespace EventGenerationAndProcessingSystem;
 /// </summary>
 public class Event
 {
+    [JsonPropertyName("id")]
     /// <summary>
     /// Id события
     /// </summary>
     public Guid Id { get; set; }
 
+    [JsonPropertyName("type")]
     /// <summary>
     /// Тип события
     /// </summary>
     public EventTypeEnum Type { get; set; }
 
+    [JsonPropertyName("time")]
     /// <summary>
     /// Время события
     /// </summary>
     public DateTime Time { get; set; }
     
+    [JsonPropertyName("incidentId")]
     /// <summary>
     /// Внешний ключ
     /// </summary>
     public Guid IncidentId { get; set; }  
     
+    [Newtonsoft.Json.JsonIgnore]
     /// <summary>
     /// Навигационное свойство
     /// </summary>

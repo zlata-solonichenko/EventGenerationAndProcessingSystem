@@ -24,7 +24,6 @@ public class GeneratorController : ControllerBase
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateManualEvent([FromBody] Event getEvent)
     {
-        
         if (getEvent == null)
         {
             return BadRequest("Event data is null");
@@ -37,13 +36,13 @@ public class GeneratorController : ControllerBase
             {
                 Id = Guid.NewGuid(),
                 Type = getEvent.Type,
-                Time = DateTime.UtcNow
+                Time = DateTime.UtcNow,
+                IncidentId = Guid.NewGuid()
             };
 
             // Отправка события по HTTP
             var response = await _httpClient.PostAsJsonAsync("http://localhost:7297/api/events", newEvent);
             response.EnsureSuccessStatusCode();
-            
             return Ok(newEvent);
         }
         catch (Exception ex)
