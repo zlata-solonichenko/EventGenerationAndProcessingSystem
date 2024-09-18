@@ -1,3 +1,6 @@
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
+
 namespace EventGenerationAndProcessingSystem;
 
 /// <summary>
@@ -5,33 +8,33 @@ namespace EventGenerationAndProcessingSystem;
 /// </summary>
 public class Incident
 {
+    [Key]
     /// <summary>
     /// Id инцидента
     /// </summary>
     public Guid Id { get; set; }
-    
+
     /// <summary>
     /// Тип инцидента
     /// </summary>
     public IncidentTypeEnum Type { get; set; }
-    
+
     /// <summary>
     /// Время инцидента
     /// </summary>
     public DateTime Time { get; set; }
-    
+
     /// <summary>
     /// Лист событий
     /// </summary>
     public List<Event> Events { get; set; } = new List<Event>();
-    
-    /// <summary>
-    /// Перечисление событий
-    /// </summary>
-    public enum IncidentTypeEnum
-    {
-        Type1 = 1,
-        Type2 = 2
-    }
+}
 
+/// <summary>
+/// Перечисление событий
+/// </summary>
+public enum IncidentTypeEnum
+{
+    Type1 = 1,
+    Type2 = 2
 }
