@@ -17,7 +17,7 @@ public class Event
     /// <summary>
     /// Тип события
     /// </summary>
-    public EventTypeEnum Type { get; set; }
+    public int Type { get; set; }
 
     [JsonPropertyName("time")]
     /// <summary>
@@ -31,7 +31,6 @@ public class Event
     /// </summary>
     public Guid IncidentId { get; set; }  
     
-    [Newtonsoft.Json.JsonIgnore]
     /// <summary>
     /// Навигационное свойство
     /// </summary>

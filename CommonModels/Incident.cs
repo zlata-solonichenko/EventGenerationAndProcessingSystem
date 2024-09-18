@@ -1,5 +1,6 @@
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EventGenerationAndProcessingSystem;
 
@@ -17,7 +18,7 @@ public class Incident
     /// <summary>
     /// Тип инцидента
     /// </summary>
-    public IncidentTypeEnum Type { get; set; }
+    public int Type { get; set; }
 
     /// <summary>
     /// Время инцидента

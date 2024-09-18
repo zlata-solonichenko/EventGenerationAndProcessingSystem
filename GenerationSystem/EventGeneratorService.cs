@@ -38,7 +38,7 @@ public class EventGeneratorService : BackgroundService
             var newEvent = new Event
             {
                 Id = Guid.NewGuid(),
-                Type = (EventTypeEnum)_random.Next(0, Enum.GetValues(typeof(EventTypeEnum)).Length),
+                Type = _random.Next(0, Enum.GetValues(typeof(EventTypeEnum)).Length),
                 Time = DateTime.UtcNow
             };
             
@@ -61,7 +61,7 @@ public class EventGeneratorService : BackgroundService
         return new Event
         {
             Id = Guid.NewGuid(),
-            Type = (EventTypeEnum)_random.Next(0, Enum.GetValues(typeof(EventTypeEnum)).Length),
+            Type = _random.Next(0, Enum.GetValues(typeof(EventTypeEnum)).Length),
             Time = DateTime.UtcNow
         };
     }

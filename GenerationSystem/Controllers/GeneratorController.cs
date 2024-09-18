@@ -1,8 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace EventGenerationAndProcessingSystem.Controllers;
 
@@ -29,6 +31,11 @@ public class GeneratorController : ControllerBase
             return BadRequest("Event data is null");
         }
 
+        if (getEvent.Incident == null)
+        {
+            return BadRequest("Incident data is null");
+        }
+        
         try
         {
             // Создание события
@@ -37,13 +44,27 @@ public class GeneratorController : ControllerBase
                 Id = Guid.NewGuid(),
                 Type = getEvent.Type,
                 Time = DateTime.UtcNow,
-                IncidentId = Guid.NewGuid()
+                IncidentId = getEvent.Incident.Id,
+                Incident = new Incident
+                {
+                Id = getEvent.Incident.Id,
+                Type = getEvent.Incident.Type,
+                Time = getEvent.Incident.Time,
+                Events = new List<Event>()  // Пустой список событий
+                } 
             };
-
+            var json = JsonConvert.SerializeObject(newEvent, Formatting.Indented);
+            
             // Отправка события по HTTP
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:7297/api/Generator/generate", newEvent);
-            response.EnsureSuccessStatusCode();
-            return Ok(newEvent);
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:7297/api/Generator/generate", json);
+            if (response.IsSuccessStatusCode)
+            {
+                return Ok(newEvent);  // Возвращаем успешный результат
+            }
+            else
+            {
+                return StatusCode((int)response.StatusCode, "Failed to send event");
+            }
         }
         catch (Exception ex)
         {
@@ -51,4 +72,5 @@ public class GeneratorController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+    
 }

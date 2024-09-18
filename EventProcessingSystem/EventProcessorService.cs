@@ -39,10 +39,10 @@ public class EventProcessorService
         Incident incident = null;
 
         // Проверка на соответствие шаблону 2 (составной)
-        if (newEvent.Type == EventTypeEnum.Type2)
+        if ((EventTypeEnum)newEvent.Type == EventTypeEnum.Type2)
         {
             var relatedEvent = await _dbContext.Events
-                .Where(e => e.Type == EventTypeEnum.Type1 && e.Time > newEvent.Time.AddSeconds(-20) &&
+                .Where(e => e.Type == (int)EventTypeEnum.Type1 && e.Time > newEvent.Time.AddSeconds(-20) &&
                             e.Time <= newEvent.Time)
                 .OrderBy(e => e.Time)
                 .FirstOrDefaultAsync();
@@ -52,7 +52,7 @@ public class EventProcessorService
                 return new Incident
                 {
                     Id = Guid.NewGuid(),
-                    Type = IncidentTypeEnum.Type2,
+                    Type = (int)IncidentTypeEnum.Type2,
                     Time = DateTime.UtcNow,
                     Events = new List<Event> { newEvent, relatedEvent }
                 };
@@ -60,12 +60,12 @@ public class EventProcessorService
         }
 
         // Проверка на соответствие шаблону 1 (простой)
-        if (newEvent.Type == EventTypeEnum.Type1)
+        if ((EventTypeEnum)newEvent.Type == EventTypeEnum.Type1)
         {
             return new Incident
             {
                 Id = Guid.NewGuid(),
-                Type = IncidentTypeEnum.Type1,
+                Type = (int)IncidentTypeEnum.Type1,
                 Time = DateTime.UtcNow,
                 Events = new List<Event> { newEvent }
             };
