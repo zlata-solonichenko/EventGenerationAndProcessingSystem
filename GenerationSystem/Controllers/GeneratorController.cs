@@ -41,7 +41,7 @@ public class GeneratorController : ControllerBase
             };
 
             // Отправка события по HTTP
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:7297/api/events", newEvent);
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:7297/api/Generator/generate", newEvent);
             response.EnsureSuccessStatusCode();
             return Ok(newEvent);
         }
