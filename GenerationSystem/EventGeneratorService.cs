@@ -74,7 +74,7 @@ public class EventGeneratorService : BackgroundService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:5001/api/processor", generatedEvent);
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:5432/api/processor", generatedEvent);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Событие успешно отправлено процессору.");
@@ -88,14 +88,6 @@ public class EventGeneratorService : BackgroundService
         {
             _logger.LogError($"Ошибка отправки события процессору: {ex.Message}");
         }
-    }
-    
-    /// <summary>
-    /// Отправка события вручную (я не понимаю куда её ставить)
-    /// </summary>
-    public async Task SendEventManually()
-    {
-        var newGeneratedEvent = GenerateEvent();
     }
     
 }

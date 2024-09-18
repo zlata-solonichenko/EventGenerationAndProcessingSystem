@@ -18,16 +18,29 @@ public class GeneratorController : ControllerBase
      /// </summary>
      /// <returns></returns>
     [HttpPost("generate")]
-    public async Task<IActionResult> GenerateManualEvent()
+    public async Task<IActionResult> GenerateManualEvent([FromBody] Event getEvent)
     {
+        if (getEvent == null)
+        {
+            return BadRequest("Event data is null");
+        }
+
         try
         {
-            await _eventGeneratorService.SendEventManually();
-            return Ok("Event generated and sent to processor.");
+            // Создание события
+            var newEvent = new Event
+            {
+                Id = Guid.NewGuid(),
+                Type = getEvent.Type,
+                Time = DateTime.UtcNow
+            };
+
+            return Ok(newEvent);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Error generating event: {ex.Message}");
+            // Логирование ошибки
+            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 }

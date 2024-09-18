@@ -9,18 +9,20 @@ public class ProcessorController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
     private static readonly List<Incident> Incidents = new List<Incident>();
+    private readonly EventProcessorService _eventProcessorService;
     private readonly ILogger<ProcessorController> _logger;
 
-    public ProcessorController(ILogger<ProcessorController> logger, ApplicationDbContext dbContext)
+    public ProcessorController(ILogger<ProcessorController> logger, ApplicationDbContext dbContext, EventProcessorService eventProcessorService)
     {
         _logger = logger;
         _dbContext = dbContext;
+        _eventProcessorService = eventProcessorService;
     }
 
     /// <summary>
     /// Получение события и создания инцидента
     /// </summary>
-    /// <param name="???"></param>
+    /// <param name="полученное событие"></param>
     /// <returns></returns>
     [HttpPost]
     public async Task<IActionResult> ProcessEvent([FromBody] Event receivedEvent)
@@ -30,7 +32,7 @@ public class ProcessorController : ControllerBase
             return BadRequest("Событие равно нулю.");
         }
         
-        Incident incident = await CreateIncidentBasedOnEvent(receivedEvent);
+        Incident incident = await _eventProcessorService.CreateIncidentBasedOnEvent(receivedEvent);
         
         if (incident != null)
         {
@@ -45,7 +47,7 @@ public class ProcessorController : ControllerBase
     
     // Метод для получения списка инцидентов с возможностью сортировки и пагинации
     [HttpGet("incidents")]
-    public async Task<IActionResult> GetIncidents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string sortBy = "CreatedAt", [FromQuery] bool ascending = true)
+    public async Task<IActionResult> GetIncidents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string sortBy = "Time", [FromQuery] bool ascending = true)
     {
         var incidents = await _dbContext.Incidents
             .Include(i => i.Events) // Включаем связанные события
@@ -54,43 +56,7 @@ public class ProcessorController : ControllerBase
         var sortedIncidents = SortAndPaginateIncidents(incidents, page, pageSize, sortBy, ascending);
         return Ok(sortedIncidents);
     }
-
-    private async Task<Incident> CreateIncidentBasedOnEvent(Event newEvent)
-    {
-        // Проверка на соответствие шаблону 2 (составной)
-        if (newEvent.Type == EventTypeEnum.Type2)
-        {
-            var relatedEvent = await _dbContext.Events
-                .Where(e => e.Type == EventTypeEnum.Type1 && e.Time > newEvent.Time.AddSeconds(-20) && e.Time <= newEvent.Time)
-                .OrderBy(e => e.Time)
-                .FirstOrDefaultAsync();
-
-            if (relatedEvent != null)
-            {
-                return new Incident
-                {
-                    Id = Guid.NewGuid(),
-                    Type = IncidentTypeEnum.Type2,
-                    Time = DateTime.UtcNow,
-                    Events = new List<Event> { newEvent, relatedEvent }
-                };
-            }
-        }
-
-        // Проверка на соответствие шаблону 1 (простой)
-        if (newEvent.Type == EventTypeEnum.Type1)
-        {
-            return new Incident
-            {
-                Id = Guid.NewGuid(),
-                Type = IncidentTypeEnum.Type1,
-                Time = DateTime.UtcNow,
-                Events = new List<Event> { newEvent }
-            };
-        }
-
-        return null;
-    }
+    
 
     private IEnumerable<Incident> SortAndPaginateIncidents(IEnumerable<Incident> incidents, int page, int pageSize, string sortBy, bool ascending)
     {
@@ -99,7 +65,7 @@ public class ProcessorController : ControllerBase
         // Сортировка
         switch (sortBy.ToLower())
         {
-            case "createdat":
+            case "time":
                 query = ascending ? query.OrderBy(i => i.Time) : query.OrderByDescending(i => i.Time);
                 break;
             case "type":

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace EventGenerationAndProcessingSystem;
+
 ///2. Процессор
 /// - имеет REST API (swagger) через которое принимает события и создает на их основе инциденты
 /// - имеет БД в которую сохраняет созданные инциденты
@@ -15,52 +16,59 @@ namespace EventGenerationAndProcessingSystem;
 /// 2.1 составной шаблон описывает инцидент в котором участвуют несколько событий, он имеет временную границу
 /// 2.2 составной шаблон имеет приоритет, если событие соответствует составному шаблону, оно не участвует в простом шаблоне №1
 /// 
-
-
 /// <summary>
 /// Сущность процессора
 /// </summary>
 public class EventProcessorService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<EventProcessorService> _logger;
 
-    public EventProcessorService(ApplicationDbContext dbContext)
+    public EventProcessorService(ApplicationDbContext dbContext, ILogger<EventProcessorService> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
-    public async Task ProcessEventAsync(Event newEvent)
+    /// <summary>
+    /// Шаблоны
+    /// </summary>
+    /// <param name="newEvent"></param>
+    public async Task<Incident> CreateIncidentBasedOnEvent(Event newEvent)
     {
         Incident incident = null;
 
-        // Проверка по шаблону 1
-        if (newEvent.Type == EventTypeEnum.Type1)
+        // Проверка на соответствие шаблону 2 (составной)
+        if (newEvent.Type == EventTypeEnum.Type2)
         {
-            incident = new Incident
-            {
-                Id = Guid.NewGuid(),
-                Type = IncidentTypeEnum.Type1,
-                Time = DateTime.UtcNow
-            };
-        }
-
-        // Логика составного шаблона
-        else if (newEvent.Type == EventTypeEnum.Type2)
-        {
-            var previousEvent = await _dbContext.Events
-                .Where(e => e.Type == EventTypeEnum.Type1 && e.Time >= DateTime.UtcNow.AddSeconds(-20))
-                .OrderByDescending(e => e.Time)
+            var relatedEvent = await _dbContext.Events
+                .Where(e => e.Type == EventTypeEnum.Type1 && e.Time > newEvent.Time.AddSeconds(-20) &&
+                            e.Time <= newEvent.Time)
+                .OrderBy(e => e.Time)
                 .FirstOrDefaultAsync();
 
-            if (previousEvent != null)
+            if (relatedEvent != null)
             {
-                incident = new Incident
+                return new Incident
                 {
                     Id = Guid.NewGuid(),
                     Type = IncidentTypeEnum.Type2,
-                    Time = DateTime.UtcNow
+                    Time = DateTime.UtcNow,
+                    Events = new List<Event> { newEvent, relatedEvent }
                 };
             }
+        }
+
+        // Проверка на соответствие шаблону 1 (простой)
+        if (newEvent.Type == EventTypeEnum.Type1)
+        {
+            return new Incident
+            {
+                Id = Guid.NewGuid(),
+                Type = IncidentTypeEnum.Type1,
+                Time = DateTime.UtcNow,
+                Events = new List<Event> { newEvent }
+            };
         }
 
         if (incident != null)
@@ -68,5 +76,7 @@ public class EventProcessorService
             _dbContext.Incidents.Add(incident);
             await _dbContext.SaveChangesAsync();
         }
+
+        return null;
     }
 }
