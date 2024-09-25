@@ -1,3 +1,4 @@
+using CommonModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,14 +10,14 @@ public class ProcessorController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
     private static readonly List<Incident> Incidents = new List<Incident>();
-    private readonly EventProcessorService _eventProcessorService;
     private readonly ILogger<ProcessorController> _logger;
+    private readonly ProcessorService _processorService;
 
-    public ProcessorController(ILogger<ProcessorController> logger, ApplicationDbContext dbContext, EventProcessorService eventProcessorService)
+    public ProcessorController(ILogger<ProcessorController> logger, ApplicationDbContext dbContext, ProcessorService processorController)    
     {
         _logger = logger;
         _dbContext = dbContext;
-        _eventProcessorService = eventProcessorService;
+        _processorService = processorController;
     }
 
     /// <summary>
@@ -25,27 +26,22 @@ public class ProcessorController : ControllerBase
     /// <param name="полученное событие"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<IActionResult> ProcessEvent([FromBody] Event receivedEvent)
+    public async Task<IActionResult> PostEvent([FromBody] SomeEvent inputEvent)
     {
-        if (receivedEvent == null)
+        if (inputEvent == null)
         {
-            return BadRequest("Событие равно нулю.");
+            return BadRequest("Event data is null");
         }
         
-        Incident incident = await _eventProcessorService.CreateIncidentBasedOnEvent(receivedEvent);
+        await _processorService.ProcessEvent(inputEvent);
+        return Ok("Событие успешно принято для обработки.");
         
-        if (incident != null)
-        {
-            _dbContext.Incidents.Add(incident);
-            await _dbContext.SaveChangesAsync();
-            _logger.LogInformation($"Создано событие: {incident.Id}, Тип: {incident.Type}");
-            return Ok("Событие обработано и инцидент создан.");
-        }
-
-        return BadRequest("Событие не соответствует никакому шаблону.");
     }
     
-    // Метод для получения списка инцидентов с возможностью сортировки и пагинации
+    /// <summary>
+    /// Метод для получения списка инцидентов с возможностью сортировки и пагинации
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("incidents")]
     public async Task<IActionResult> GetIncidents([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string sortBy = "Time", [FromQuery] bool ascending = true)
     {
@@ -56,7 +52,6 @@ public class ProcessorController : ControllerBase
         var sortedIncidents = SortAndPaginateIncidents(incidents, page, pageSize, sortBy, ascending);
         return Ok(sortedIncidents);
     }
-    
 
     private IEnumerable<Incident> SortAndPaginateIncidents(IEnumerable<Incident> incidents, int page, int pageSize, string sortBy, bool ascending)
     {

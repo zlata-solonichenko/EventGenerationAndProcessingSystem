@@ -1,3 +1,6 @@
+using CommonModels;
+using Newtonsoft.Json;
+
 namespace EventGenerationAndProcessingSystem;
 
 ///1. Генератор
@@ -10,37 +13,31 @@ namespace EventGenerationAndProcessingSystem;
 /// <summary>
 /// Сущность генератора
 /// </summary>
-public class EventGeneratorService : BackgroundService
+public class GeneratorService : BackgroundService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<EventGeneratorService> _logger;
+    private readonly ILogger<GeneratorService> _logger;
     private readonly Random _random = new Random();
+    private readonly string _processorUrl;
 
-    public EventGeneratorService(HttpClient httpClient, ILogger<EventGeneratorService> logger)
+    public GeneratorService(HttpClient httpClient, ILogger<GeneratorService> logger, IConfiguration configuration)
     {
         _httpClient = httpClient;
         _logger = logger;
+        _processorUrl = configuration["http://localhost:5274/api/Processor"];
     }
 
     /// <summary>
-    /// Асинхронное выполнение
+    /// Асинхронное выполнение отправки события (сгенерированного генератором) процессору
     /// </summary>
     /// <param name="stoppingToken"></param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            // Генерация случайного времени в пределах 2 секунд
-            var delay = _random.Next(0, 2000); 
+            // Генерация случайного времени в пределах от 1 до 2 секунд
+            var delay = _random.Next(1000, 2000); 
             await Task.Delay(delay, stoppingToken);
-
-            // Генерация события
-            var newEvent = new Event
-            {
-                Id = Guid.NewGuid(),
-                Type = _random.Next(0, Enum.GetValues(typeof(EventTypeEnum)).Length),
-                Time = DateTime.UtcNow
-            };
             
             // Генерация нового события
             var generatedEvent = GenerateEvent();
@@ -53,12 +50,12 @@ public class EventGeneratorService : BackgroundService
     }
 
     /// <summary>
-    /// Генерация события
+    /// Генерация нового события
     /// </summary>
     /// <returns></returns>
-    private Event GenerateEvent()
+    private SomeEvent GenerateEvent()
     {
-        return new Event
+        return new SomeEvent
         {
             Id = Guid.NewGuid(),
             Type = _random.Next(0, Enum.GetValues(typeof(EventTypeEnum)).Length),
@@ -69,12 +66,14 @@ public class EventGeneratorService : BackgroundService
     /// <summary>
     /// Отправка события процессору через HTTP-запрос
     /// </summary>
-    /// <param name="generatedEvent"></param>
-    private async Task SendEventToProcessor(Event generatedEvent)
+    /// <param name="generatedSomeEvent"></param>
+    private async Task SendEventToProcessor(SomeEvent generatedSomeEvent)
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:5432/api/processor", generatedEvent);
+            //var json = JsonConvert.SerializeObject(generatedSomeEvent, Formatting.Indented);
+            
+            var response = await _httpClient.PostAsJsonAsync(_processorUrl, generatedSomeEvent);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Событие успешно отправлено процессору.");

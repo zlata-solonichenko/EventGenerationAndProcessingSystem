@@ -10,13 +10,11 @@ builder.Services.AddHttpClient();
 // Регистрация DbContext с использованием Npgsql
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Регистрация EventProcessorService
-builder.Services.AddScoped<EventProcessorService>();
-// Регистрация EventGeneratorService
-builder.Services.AddScoped<EventGeneratorService>();
-
 builder.Services.AddControllers();
+
+// Регистрация ProcessorService
+builder.Services.AddScoped<ProcessorService>(); 
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

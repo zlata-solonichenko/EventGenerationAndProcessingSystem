@@ -1,31 +1,27 @@
-using System.Text.Json.Serialization;
+using EventGenerationAndProcessingSystem;
 
-namespace EventGenerationAndProcessingSystem;
+namespace CommonModels;
 
 /// <summary>
 /// Представляет собой сущность события
 /// </summary>
-public class Event
+public class SomeEvent
 {
-    [JsonPropertyName("id")]
     /// <summary>
     /// Id события
     /// </summary>
     public Guid Id { get; set; }
-
-    [JsonPropertyName("type")]
+    
     /// <summary>
     /// Тип события
     /// </summary>
     public int Type { get; set; }
 
-    [JsonPropertyName("time")]
     /// <summary>
     /// Время события
     /// </summary>
     public DateTime Time { get; set; }
     
-    [JsonPropertyName("incidentId")]
     /// <summary>
     /// Внешний ключ
     /// </summary>

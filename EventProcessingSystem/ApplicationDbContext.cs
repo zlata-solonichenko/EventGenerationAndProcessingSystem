@@ -1,3 +1,4 @@
+using CommonModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -13,7 +14,7 @@ public class ApplicationDbContext : DbContext, IDesignTimeDbContextFactory<Appli
     public ApplicationDbContext(){}
     
     public DbSet<Incident> Incidents { get; set; }
-    public DbSet<Event> Events { get; set; }
+    public DbSet<SomeEvent> Events { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,7 +24,7 @@ public class ApplicationDbContext : DbContext, IDesignTimeDbContextFactory<Appli
             .HasForeignKey(e=>e.IncidentId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        modelBuilder.Entity<Event>()
+        modelBuilder.Entity<SomeEvent>()
             .HasOne(e => e.Incident)
             .WithMany(i => i.Events)
             .HasForeignKey(e => e.IncidentId);

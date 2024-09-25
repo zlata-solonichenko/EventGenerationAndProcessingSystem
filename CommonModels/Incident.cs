@@ -1,6 +1,7 @@
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using CommonModels;
 
 namespace EventGenerationAndProcessingSystem;
 
@@ -9,10 +10,10 @@ namespace EventGenerationAndProcessingSystem;
 /// </summary>
 public class Incident
 {
-    [Key]
     /// <summary>
     /// Id инцидента
     /// </summary>
+    [Key]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -28,7 +29,7 @@ public class Incident
     /// <summary>
     /// Лист событий
     /// </summary>
-    public List<Event> Events { get; set; } = new List<Event>();
+    public List<SomeEvent> Events { get; set; } = new List<SomeEvent>();
 }
 
 /// <summary>
