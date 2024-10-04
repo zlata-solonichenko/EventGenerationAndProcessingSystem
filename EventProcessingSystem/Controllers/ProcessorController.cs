@@ -26,14 +26,21 @@ public class ProcessorController : ControllerBase
     /// <param name="полученное событие"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<IActionResult> PostEvent([FromBody] SomeEvent inputEvent)
+    public async Task<IActionResult> PostEvent([FromBody] EventDto inputEvent, CancellationToken stoppingToken)
     {
         if (inputEvent == null)
         {
             return BadRequest("Event data is null");
         }
+
+        var someEvent = new SomeEvent
+        {
+            Id = inputEvent.Id,
+            Type = inputEvent.Type,
+            Time = inputEvent.Time,
+        };
         
-        await _processorService.ProcessEvent(inputEvent);
+        await _processorService.ProcessEvent(someEvent, stoppingToken);
         return Ok("Событие успешно принято для обработки.");
         
     }
@@ -53,6 +60,15 @@ public class ProcessorController : ControllerBase
         return Ok(sortedIncidents);
     }
 
+    /// <summary>
+    /// Метод выполняет сортировку и пагинацию списка инцидентов
+    /// </summary>
+    /// <param name="incidents">список инцидентов</param>
+    /// <param name="page">номер страницы, которую нужно вернуть</param>
+    /// <param name="pageSize">количество элементов на одной странице</param>
+    /// <param name="sortBy">критерий сортировки</param>
+    /// <param name="ascending">флаг, указывающий на порядок сортировки</param>
+    /// <returns></returns>
     private IEnumerable<Incident> SortAndPaginateIncidents(IEnumerable<Incident> incidents, int page, int pageSize, string sortBy, bool ascending)
     {
         var query = incidents.AsQueryable();

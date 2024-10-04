@@ -31,6 +31,11 @@ public class SomeEvent
     /// Навигационное свойство
     /// </summary>
     public Incident Incident { get; set; }
+    
+    /// <summary>
+    /// Обработано ли событие
+    /// </summary>
+    public bool IsProcessed { get; set; }
 }
 
 /// <summary>

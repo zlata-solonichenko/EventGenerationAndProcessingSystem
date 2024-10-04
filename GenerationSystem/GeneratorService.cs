@@ -20,11 +20,11 @@ public class GeneratorService : BackgroundService
     private readonly Random _random = new Random();
     private readonly string _processorUrl;
 
-    public GeneratorService(HttpClient httpClient, ILogger<GeneratorService> logger, IConfiguration configuration)
+    public GeneratorService(HttpClient httpClient, ILogger<GeneratorService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
-        _processorUrl = configuration["http://localhost:5274/api/Processor"];
+        _processorUrl = "http://localhost:5274/api/Processor";
     }
 
     /// <summary>
@@ -71,9 +71,10 @@ public class GeneratorService : BackgroundService
     {
         try
         {
-            //var json = JsonConvert.SerializeObject(generatedSomeEvent, Formatting.Indented);
-            
             var response = await _httpClient.PostAsJsonAsync(_processorUrl, generatedSomeEvent);
+            response.EnsureSuccessStatusCode();
+            _logger.LogInformation("Отправлено событие с идентификатором {eventId}", generatedSomeEvent.Id);
+            
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Событие успешно отправлено процессору.");

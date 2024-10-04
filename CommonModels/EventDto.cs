@@ -15,10 +15,5 @@ public class EventDto
     /// <summary>
     /// Время события
     /// </summary>
-    public DateTime Time { get; set; }
-    
-    /// <summary>
-    /// Внешний ключ
-    /// </summary>
-    public Guid IncidentId { get; set; }  
+    public DateTime Time { get; set; } 
 }

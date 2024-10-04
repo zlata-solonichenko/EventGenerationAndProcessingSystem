@@ -35,7 +35,7 @@ public class GeneratorController : ControllerBase
         try
         {
             // Создание события
-            var newEvent = new SomeEvent
+            var newEvent = new EventDto 
             {
                 Id = Guid.NewGuid(),
                 Type = inputEvent.Type,
