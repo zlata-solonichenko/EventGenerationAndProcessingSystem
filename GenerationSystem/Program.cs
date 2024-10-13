@@ -12,7 +12,7 @@ builder.Services.AddSwaggerGen();
 
 
 // Регистрация GeneratorService
-builder.Services.AddScoped<GeneratorService>();
+builder.Services.AddHostedService<GeneratorService>();
 
 var app = builder.Build();
 

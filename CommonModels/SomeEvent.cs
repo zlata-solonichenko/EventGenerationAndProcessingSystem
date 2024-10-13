@@ -25,12 +25,12 @@ public class SomeEvent
     /// <summary>
     /// Внешний ключ
     /// </summary>
-    public Guid IncidentId { get; set; }  
+    //public Guid IncidentId { get; set; }  
     
     /// <summary>
     /// Навигационное свойство
     /// </summary>
-    public Incident Incident { get; set; }
+   // public Incident Incident { get; set; }
     
     /// <summary>
     /// Обработано ли событие

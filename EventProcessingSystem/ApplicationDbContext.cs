@@ -20,14 +20,13 @@ public class ApplicationDbContext : DbContext, IDesignTimeDbContextFactory<Appli
     {
         modelBuilder.Entity<Incident>()
             .HasMany(i => i.Events)
-            .WithOne(e=>e.Incident)
-            .HasForeignKey(e=>e.IncidentId)
+            .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
         
-        modelBuilder.Entity<SomeEvent>()
-            .HasOne(e => e.Incident)
-            .WithMany(i => i.Events)
-            .HasForeignKey(e => e.IncidentId);
+        // modelBuilder.Entity<SomeEvent>()
+        //     .HasOne(e => e.Incident)
+        //     .WithMany(i => i.Events)
+        //     .HasForeignKey(e => e.IncidentId);
     }
 
     public ApplicationDbContext CreateDbContext(string[] args)

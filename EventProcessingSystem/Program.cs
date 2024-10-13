@@ -28,6 +28,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 // dotnet ef migrations add InitialCreate --project EventProcessingSystem.csproj
 
 // app.UseRouting();

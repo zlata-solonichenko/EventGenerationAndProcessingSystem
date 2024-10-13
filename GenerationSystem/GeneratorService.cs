@@ -42,10 +42,15 @@ public class GeneratorService : BackgroundService
             // Генерация нового события
             var generatedEvent = GenerateEvent();
 
-            await SendEventToProcessor(generatedEvent);
-            
-            _logger.LogInformation("Было сгенерировано новое событие");
-
+            try
+            {
+                await SendEventToProcessor(generatedEvent);
+                _logger.LogInformation("Было сгенерировано и отправлено новое событие");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+            }
         }
     }
 
